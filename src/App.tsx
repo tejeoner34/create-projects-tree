@@ -40,15 +40,7 @@ const files: Item[] = [
   },
 ];
 
-function Item({
-  name,
-  children,
-  deepLevel,
-}: {
-  name: string;
-  children: Item[] | undefined;
-  deepLevel: number;
-}) {
+function Item({ name, children }: { name: string; children: Item[] | undefined }) {
   const [isHidden, setIsHidden] = useState(true);
   const handleClick = (ev: MouseEvent) => {
     ev.stopPropagation();
@@ -58,14 +50,19 @@ function Item({
   const plusSvgTpl = () => children?.length && (isHidden ? '+' : '-');
 
   return (
-    <div style={{ paddingLeft: deepLevel * 10 }} onClick={handleClick}>
+    <li
+      style={{ marginLeft: 10 }}
+      onClick={handleClick}
+      aria-expanded={!isHidden}
+      aria-controls="items-list"
+    >
       {plusSvgTpl()}
       {name}
-      {!isHidden &&
-        children?.map((child: Item) => (
-          <Item name={child.name} children={child.children} deepLevel={deepLevel + 1} />
-        ))}
-    </div>
+      <ul id="items-list">
+        {!isHidden &&
+          children?.map((child: Item) => <Item name={child.name} children={child.children} />)}
+      </ul>
+    </li>
   );
 }
 
@@ -73,7 +70,9 @@ function App() {
   return (
     <>
       {files.map((file) => (
-        <Item name={file.name} children={file.children} deepLevel={1} />
+        <ul>
+          <Item name={file.name} children={file.children} />
+        </ul>
       ))}
     </>
   );
