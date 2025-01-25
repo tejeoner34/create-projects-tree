@@ -1,35 +1,82 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { MouseEvent, useState } from 'react';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+type Item = {
+  name: string;
+  children?: Item[];
+};
+
+const files: Item[] = [
+  {
+    name: 'src',
+    children: [
+      {
+        name: 'main.tsx',
+      },
+      {
+        name: 'App.tsx',
+      },
+      {
+        name: 'index.css',
+      },
+      {
+        name: 'assets',
+        children: [
+          {
+            name: 'react.svg',
+          },
+          {
+            name: 'vite.svg',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    name: 'package.json',
+  },
+  {
+    name: 'tsconfig.json',
+  },
+];
+
+function Item({
+  name,
+  children,
+  deepLevel,
+}: {
+  name: string;
+  children: Item[] | undefined;
+  deepLevel: number;
+}) {
+  const [isHidden, setIsHidden] = useState(true);
+  const handleClick = (ev: MouseEvent) => {
+    ev.stopPropagation();
+    setIsHidden(!isHidden);
+  };
+
+  const plusSvgTpl = () => children?.length && (isHidden ? '+' : '-');
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div style={{ paddingLeft: deepLevel * 10 }} onClick={handleClick}>
+      {plusSvgTpl()}
+      {name}
+      {!isHidden &&
+        children?.map((child: Item) => (
+          <Item name={child.name} children={child.children} deepLevel={deepLevel + 1} />
+        ))}
+    </div>
+  );
 }
 
-export default App
+function App() {
+  return (
+    <>
+      {files.map((file) => (
+        <Item name={file.name} children={file.children} deepLevel={1} />
+      ))}
+    </>
+  );
+}
+
+export default App;
